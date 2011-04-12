@@ -7,7 +7,7 @@ a.k.a. A cautionary tale about how you should think about the absurdity of
 
 Overview
 
-  http_tail aims to solve a simple<C-F10> problem: you want to monitor a log and
+  http_tail aims to solve a simple problem: you want to monitor a log and
   for some arcane reason, someone (who could be you) can SSH to the server and start
   a daemon while you cannot.
 

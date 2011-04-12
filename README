@@ -1,0 +1,53 @@
+http_tail - tail -f inside your browser
+
+a.k.a.: A cautionary tale about how you should think about the absurdity of
+        the problem before hacking away
+
+-
+
+Overview
+
+  http_tail aims to solve a problem: you want to monitor a log and for some
+  arcane reason, someone (who could be you) can SSH to the server and start
+  a daemon while you cannot.
+
+  See? Absurd. But hey, "browser-based tail -f"! Also, you can bookmark
+  the address so you can monitor the log whenever - and from wherever - you are!
+  Actually, "showing the log to someone who can't ssh to your box" seems
+  like a good use case. Who knows.
+
+How to use
+
+  To start the service, run:
+
+    python http_tail.py <file> <host> <port>
+ 
+    where:
+    
+    <file> is the path to the file that will be watched
+    <host> is the host name. IT MUST BE THE SAME AS THE ONE YOU'LL USE TO ACCESS
+           THE SERVICE, BECAUSE THE VIEW PAGE USES XMLHTTPREQUEST AND IT DOES
+           NOT ALLOW CROSS-ORIGIN REQUESTS. BE WARNED.
+    <port> the port the service will listen on
+  
+  After starting the service, point your browser to:
+
+    http://<host>:<port>/view
+
+  Type the file name in the input box and click "Start tail -f"
+
+  e.g:
+
+    python http_tail.py http_tail.py 127.0.0.1 8000
+
+  Starts the service that can be accessed at:
+
+    http://127.0.0.1:8000/view
+
+  Have fun! (I guess)
+
+TODO:
+
+  - Simple token-based authentication
+  - More view controls (start at)
+  - Put the file view inside an iframe (oh, I can almost hear a webdesigner somewhere screaming)

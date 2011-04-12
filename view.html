@@ -1,0 +1,90 @@
+<html>
+<head>
+    <script>
+        var xmlhttp=false;
+
+        /*@cc_on @*/
+        /*@if (@_jscript_version >= 5)
+        // JScript gives us Conditional compilation, we can cope with old IE versions.
+        // and security blocked creation of the objects.
+         try {
+          xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+         } catch (e) {
+          try {
+           xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+          } catch (E) {
+           xmlhttp = false;
+          }
+         }
+        @end @*/
+
+        if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+            try {
+                xmlhttp = new XMLHttpRequest();
+            } catch (e) {
+                xmlhttp=false;
+            }
+        }
+        if (!xmlhttp && window.createRequest) {
+            try {
+                xmlhttp = window.createRequest();
+            } catch (e) {
+                xmlhttp=false;
+            }
+        }
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        var started = false;
+        var start = 0;
+
+        function add_text(text) {
+            if(text != '') {
+                $("text_box").innerHTML += text + '\n';
+                start += text.split('\n').length 
+            }
+
+            setTimeout(load_lines, 1000);
+        }
+
+        function load_lines() {
+            if(!started) {
+                return;
+            }
+    
+            file = $("file_name").value
+
+            xmlhttp.open("GET", "http://HOST_ADDRESS/tail/" + file + "/" + start, true);
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4) {
+                    add_text(xmlhttp.responseText);
+                }         
+            }
+            xmlhttp.send(null);
+        }
+
+        function start_tail() {
+            if(!started) {
+                started = true;
+                load_lines();
+            }
+            $("start_button").disabled = true;
+            $("stop_button").disabled = false;
+        }
+
+        function stop_tail() {
+            started = false;
+            $("start_button").disabled = false;
+            $("stop_button").disabled = true;
+        }
+    </script>
+</head>
+<body>
+    <input id="file_name" type="text" placeholder="Type the file name here"/>
+    <button id="start_button" onClick="start_tail()">Start tail -f</button>
+    <button id="stop_button" disabled="true" onClick="stop_tail()">Stop</button>
+    <pre id="text_box"></pre>
+</body>
+</html>

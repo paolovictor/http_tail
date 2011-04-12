@@ -1,14 +1,14 @@
 http_tail - tail -f inside your browser
 
-a.k.a.: A cautionary tale about how you should think about the absurdity of
-        the problem before hacking away
+a.k.a. A cautionary tale about how you should think about the absurdity of
+       the problem before hacking away
 
 -
 
 Overview
 
-  http_tail aims to solve a problem: you want to monitor a log and for some
-  arcane reason, someone (who could be you) can SSH to the server and start
+  http_tail aims to solve a simple<C-F10> problem: you want to monitor a log and
+  for some arcane reason, someone (who could be you) can SSH to the server and start
   a daemon while you cannot.
 
   See? Absurd. But hey, "browser-based tail -f"! Also, you can bookmark
@@ -49,10 +49,10 @@ How to use
 TODO:
 
   - Simple token-based authentication
-  - More view controls (start at)
+  - More view controls (start at line #, autoscroll, themes(?))
   - Put the file view inside an iframe (oh, I can almost hear a webdesigner somewhere screaming)
 
-Know issues:
+Known issues:
 
   - Only updates that add new lines are detected. The server and the view must be updated to
     include the number of collumns of the last line

@@ -1,0 +1,15 @@
+v0.2a
+
+- Fixed a serious bug that made the script break for file paths with
+  forward slashes. It seems that forward slashes are quite common
+  in file paths!
+- Added a "autoscroll" control
+- Set the file text to be rendered inside an iframe. Take that, web designers!
+
+  TODO:
+
+  - Enable custom update interval configuration
+
+v0.1a
+
+- First!

@@ -49,8 +49,6 @@ How to use
 TODO:
 
   - Simple token-based authentication
-  - More view controls (start at line #, autoscroll, themes(?))
-  - Put the file view inside an iframe (oh, I can almost hear a webdesigner somewhere screaming)
 
 Known issues:
 

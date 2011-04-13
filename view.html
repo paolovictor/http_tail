@@ -1,29 +1,29 @@
-<!--
-Copyright (C) 2011 by Paolo Victor
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
--->
-
 <html>
 <head>
+    <style type="text/css">
+    <!--
+        body {
+            font-family: Helvetica, Tahoma, Arial;
+            font-size: 12px;
+        }
+
+        #text_frame {
+            font-size: 10px;
+            display: block;
+            width: 100%;
+            height: 90%;
+            border: 1px solid gray;
+        }
+    -->
+    </style>
     <script>
-        var xmlhttp=false;
+        function $(id) { return document.getElementById(id) };
+
+        // Initialize XMLHTTPRequest handle
+        var xmlhttp = false;
+        var running = false;
+        var current_line = 0;
+        var updateInterval = 1000;
 
         /*@cc_on @*/
         /*@if (@_jscript_version >= 5)
@@ -47,6 +47,7 @@ THE SOFTWARE.
                 xmlhttp=false;
             }
         }
+
         if (!xmlhttp && window.createRequest) {
             try {
                 xmlhttp = window.createRequest();
@@ -55,41 +56,9 @@ THE SOFTWARE.
             }
         }
 
-        function $(id) {
-            return document.getElementById(id);
-        }
-
-        var started = false;
-        var start = 0;
-
-        function add_text(text) {
-            if(text != '') {
-                $("text_box").innerHTML += text + '\n';
-                start += text.split('\n').length 
-            }
-
-            setTimeout(load_lines, 1000);
-        }
-
-        function load_lines() {
-            if(!started) {
-                return;
-            }
-    
-            file = $("file_name").value
-
-            xmlhttp.open("GET", "http://HOST_ADDRESS/tail/" + file + "/" + start, true);
-            xmlhttp.onreadystatechange = function() {
-                if (xmlhttp.readyState == 4) {
-                    add_text(xmlhttp.responseText);
-                }         
-            }
-            xmlhttp.send(null);
-        }
-
         function start_tail() {
-            if(!started) {
-                started = true;
+            if(!running) {
+                running = true;
                 load_lines();
             }
             $("start_button").disabled = true;
@@ -97,16 +66,62 @@ THE SOFTWARE.
         }
 
         function stop_tail() {
-            started = false;
+            running = false;
             $("start_button").disabled = false;
             $("stop_button").disabled = true;
         }
+
+
+        function add_lines(text) {
+            iframe_window = $("text_frame").contentWindow;
+
+            text_box = iframe_window.document.getElementById("text_box");
+
+            if(text != "") {
+                text_box.innerHTML += text + '\n';
+                current_line += text.split('\n').length 
+            }
+
+            if($("autoscroll").value) {
+                iframe_window.scrollTo(0, iframe_window.document.body.scrollHeight);    
+            }
+
+            setTimeout(load_lines, updateInterval);
+        }
+
+        function load_lines() {
+            if(!running) {
+                return;
+            }
+    
+            xmlhttp.open("GET", "http://HOST_ADDRESS/tail?file=FILE_NAME&start_line=" + current_line, true);
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4) {
+                    add_lines(xmlhttp.responseText);
+                }         
+            }
+            xmlhttp.send(null);
+        }
+
     </script>
 </head>
 <body>
-    <input id="file_name" type="text" placeholder="Type the file name here"/>
+    <!-- Controls -->
+    File: <span id="file_name">FILE_NAME</span>
+    <div style="float:right">
     <button id="start_button" onClick="start_tail()">Start tail -f</button>
     <button id="stop_button" disabled="true" onClick="stop_tail()">Stop</button>
-    <pre id="text_box"></pre>
+    <input id="autoscroll" type="checkbox"/>Autoscroll</input>
+    </div>
+
+    <!-- Text frame -->
+    <iframe id="text_frame"></iframe>
+
+    <script>
+        <!-- Creating <pre> tag inside the iframe -->
+        text_box = $("text_frame").contentWindow.document.createElement("pre");
+        text_box.id = "text_box";
+        $("text_frame").contentWindow.document.body.appendChild(text_box);
+    </script>
 </body>
 </html>

@@ -22,13 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 '''
 
-from optparse import OptionParser
-
-import commands
 import BaseHTTPServer
-import re
+import commands
 import os
+import re
 import sys
+from urlparse import urlparse, parse_qs
 
 HTTP_TAIL_GET_FILE_SIZE_CMD = 'wc -l %s | cut -d \' \' -f1'
 
@@ -41,38 +40,44 @@ class HTTPTailRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         tokens = self.path.split('/')[1:] # Ignoring first, empty element
 
-        command = tokens[0]
-
+        request = urlparse(self.path)
+        query = parse_qs(request.query)
+       
         try:
-            if command == 'view':
-                if self.server.template_data is None:
+            if request.path == '/view':
+                if self.server.template_data is None or True:
                     self.server.template_data = ''
 
                     for line in open(HTTP_TAIL_VIEW_TEMPLATE):
-                        self.server.template_data += line.replace('HOST_ADDRESS', '%s:%d' % \
-                                                                  self.server.server_address)
-                self.send_response(200)
-                self.send_header("Content-type", "text/html")
-                self.end_headers()
+                        line = line.replace('HOST_ADDRESS', '%s:%d' % self.server.server_address)
+                        line = line.replace('FILE_NAME', '%s' % self.server.watched_file)
+                        self.server.template_data += line
+
+                self.do_HEAD(200, "text/html")
 
                 self.wfile.write(self.server.template_data)
-            elif command == 'tail':
-                filename = tokens[1]
-                start = int(tokens[2])
+            elif request.path == '/tail':
+                filename = query['file'][0]
+                start = int(query['start_line'][0])
                 file_len = int(commands.getoutput(HTTP_TAIL_GET_FILE_SIZE_CMD % filename))
                 tail_len = file_len - start
 
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain")
-                self.end_headers()
+                self.do_HEAD(200, "text/plain")
     
                 if filename == self.server.watched_file:
                     data = commands.getoutput('tail -%d %s' % (tail_len, self.server.watched_file))
                     self.wfile.write(data)
         except ValueError:
-            self.send_response(400) # Bad request
-            self.end_headers()
+            self.do_HEAD(400)
             raise
+
+    def do_HEAD(self, code = 200, ctype = None):
+        self.send_response(code)
+
+        if ctype:
+            self.send_header("Content-type", ctype)
+
+        self.end_headers()
             
 if __name__ == '__main__':
     filename = sys.argv[1]

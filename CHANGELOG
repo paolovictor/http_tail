@@ -1,7 +1,7 @@
 v0.3a
 
 - Fixed a bug on the template loader that made it look for the template on
-  the current directory instead of the scripts's directory
+  the current directory instead of the script's directory
 
 v0.2a
 

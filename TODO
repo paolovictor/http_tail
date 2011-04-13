@@ -1,0 +1,4 @@
+- Enable custom update interval
+- Token-based authorization
+- Delayed server response instead of constant client polling
+- Better command parsing with optparse

@@ -46,12 +46,8 @@ How to use
 
   Have fun! (I guess)
 
-TODO:
-
-  - Simple token-based authentication
-
 Known issues:
 
   - Only updates that add new lines are detected. The server and the view must be updated to
-    include the number of collumns of the last line
+    include the number of columns of the last line
   - Python's BaseHTTPServer isn't exactly a performance workhorse

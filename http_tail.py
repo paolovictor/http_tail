@@ -45,10 +45,11 @@ class HTTPTailRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
        
         try:
             if request.path == '/view':
-                if self.server.template_data is None or True:
+                if self.server.template_data is None:
                     self.server.template_data = ''
 
-                    for line in open(HTTP_TAIL_VIEW_TEMPLATE):
+                    template_path = os.path.join(os.path.dirname(__file__), HTTP_TAIL_VIEW_TEMPLATE)
+                    for line in open(template_path):
                         line = line.replace('HOST_ADDRESS', '%s:%d' % self.server.server_address)
                         line = line.replace('FILE_NAME', '%s' % self.server.watched_file)
                         self.server.template_data += line

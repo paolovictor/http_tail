@@ -35,6 +35,8 @@ HTTP_TAIL_TAIL_CMD = 'tail -%d %s'
 
 HTTP_TAIL_VIEW_TEMPLATE = 'view.html'
 
+HTTP_TAIL_MAX_RESPONSE_SIZE = 20000
+
 class HTTPTailRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
    
     def do_GET(self):
@@ -45,7 +47,7 @@ class HTTPTailRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
        
         try:
             if request.path == '/view':
-                if self.server.template_data is None:
+                if self.server.template_data is None or True:
                     self.server.template_data = ''
 
                     template_path = os.path.join(os.path.dirname(__file__), HTTP_TAIL_VIEW_TEMPLATE)
@@ -66,7 +68,10 @@ class HTTPTailRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.do_HEAD(200, "text/plain")
     
                 if filename == self.server.watched_file:
-                    data = commands.getoutput('tail -%d %s' % (tail_len, self.server.watched_file))
+                    #data = commands.getoutput('tail -%d %s | head -%d' % \
+                    #                  (tail_len, self.server.watched_file, HTTP_TAIL_MAX_RESPONSE_SIZE))
+                    data = commands.getoutput('tail -%d %s' % \
+                                      (tail_len, self.server.watched_file))
                     self.wfile.write(data)
         except ValueError:
             self.do_HEAD(400)

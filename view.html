@@ -7,11 +7,17 @@
             font-size: 12px;
         }
 
-        #text_frame {
-            font-size: 10px;
+        #file_canvas {
             display: block;
             width: 100%;
             height: 90%;
+        }
+
+        #text_frame {
+            font-size: 9px;
+            display: block;
+            width: 100%;
+            height: 100%;
             border: 1px solid gray;
         }
     -->
@@ -19,11 +25,55 @@
     <script>
         function $(id) { return document.getElementById(id) };
 
+        // From: http://thomas.bindzus.me/2007/12/24/adding-dynamic-contents-to-iframes/
+        // Props to Thomas Bindzus
+        function IFrame(parentElement)
+        {
+           // Create the iframe which will be returned
+           var iframe = document.createElement("iframe");
+
+           // If no parent element is specified then use body as the parent element
+           if(parentElement == null)
+              parentElement = document.body;
+
+           // This is necessary in order to initialize the document inside the iframe
+           parentElement.appendChild(iframe);
+
+           // Initiate the iframe's document to null
+           iframe.doc = null;
+
+           // Depending on browser platform get the iframe's document, this is only
+           // available if the iframe has already been appended to an element which
+           // has been added to the document
+           if(iframe.contentDocument)
+              // Firefox, Opera
+              iframe.doc = iframe.contentDocument;
+           else if(iframe.contentWindow)
+              // Internet Explorer
+              iframe.doc = iframe.contentWindow.document;
+           else if(iframe.document)
+              // Others?
+              iframe.doc = iframe.document;
+
+           // If we did not succeed in finding the document then throw an exception
+           if(iframe.doc == null)
+              throw "Document not found, append the parent element to the DOM before creating the IFrame";
+
+           // Create the script inside the iframe's document which will call the
+           iframe.doc.open();
+           iframe.doc.close();
+
+           // Return the iframe, now with an extra property iframe.doc containing the
+           // iframe's document
+           return iframe;
+        }
+
         // Initialize XMLHTTPRequest handle
         var xmlhttp = false;
         var running = false;
         var current_line = 0;
         var updateInterval = 1000;
+        var box_iframe = null;
 
         /*@cc_on @*/
         /*@if (@_jscript_version >= 5)
@@ -73,20 +123,19 @@
 
 
         function add_lines(text) {
-            iframe_window = $("text_frame").contentWindow;
-
-            text_box = iframe_window.document.getElementById("text_box");
-
+            var text_box = box_iframe.doc.getElementById("text_box");
+    
             if(text != "") {
                 text_box.innerHTML += text + '\n';
                 current_line += text.split('\n').length 
             }
 
-            if($("autoscroll").value) {
-                iframe_window.scrollTo(0, iframe_window.document.body.scrollHeight);    
-            }
-
             setTimeout(load_lines, updateInterval);
+
+            if($("autoscroll").value) {
+                // Ack! Does not work on Firefox!
+                box_iframe.scrollTo(0, box_iframe.doc.body.scrollHeight);    
+            }
         }
 
         function load_lines() {
@@ -109,19 +158,30 @@
     <!-- Controls -->
     File: <span id="file_name">FILE_NAME</span>
     <div style="float:right">
-    <button id="start_button" onClick="start_tail()">Start tail -f</button>
-    <button id="stop_button" disabled="true" onClick="stop_tail()">Stop</button>
-    <input id="autoscroll" type="checkbox"/>Autoscroll</input>
+
+        <input id="autoscroll" type="checkbox"/>Autoscroll</input>
+
+        <input id="start_at_end" type="checkbox" value="true" disabled="true"/>Start at end</input>
+
+        <button id="start_button" onClick="start_tail()">Start tail -f</button>
+
+        <button id="stop_button" disabled="true" onClick="stop_tail()">Stop</button>
     </div>
 
+    <br> <br>
+
     <!-- Text frame -->
-    <iframe id="text_frame"></iframe>
+    <div id="file_canvas"></div>
+<!--    <iframe id="text_frame"></iframe>-->
 
     <script>
-        <!-- Creating <pre> tag inside the iframe -->
-        text_box = $("text_frame").contentWindow.document.createElement("pre");
+        box_iframe = IFrame(document.getElementById("file_canvas"));
+        box_iframe.id = "text_frame";
+
+        var text_box = box_iframe.doc.createElement("pre");
+
         text_box.id = "text_box";
-        $("text_frame").contentWindow.document.body.appendChild(text_box);
+        box_iframe.doc.body.appendChild(text_box);
     </script>
 </body>
 </html>

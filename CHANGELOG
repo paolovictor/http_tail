@@ -1,3 +1,9 @@
+v0.4a 
+ 
+- Now (sort of) works on Firefox. Autoscroll is still broken, though.
+  Thanks to Thomas Bindsuz for his writeup on the iframe problem I had:
+  http://thomas.bindzus.me/2007/12/24/adding-dynamic-contents-to-iframes/
+
 v0.3a
 
 - Fixed a bug on the template loader that made it look for the template on

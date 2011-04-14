@@ -51,3 +51,6 @@ Known issues:
   - Only updates that add new lines are detected. The server and the view must be updated to
     include the number of columns of the last line
   - Python's BaseHTTPServer isn't exactly a performance workhorse
+  - Autoscroll does not work with Firefox
+  - This has not been tested on IE, Safari and Opera. Chances are I'll never even try to
+    test it on IE. If you still use IE, YOU have an issue
